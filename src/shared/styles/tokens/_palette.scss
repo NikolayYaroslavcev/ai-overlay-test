@@ -1,0 +1,29 @@
+// Raw color primitives. No semantic meaning, no theme awareness — themes/*
+// map these onto semantic CSS custom properties. Never reference $palette-*
+// outside themes/*; components must consume var(--color-*) instead.
+
+$neutral-0: #ffffff;
+$neutral-50: #f7f7f8;
+$neutral-100: #eeeef0;
+$neutral-200: #e2e2e5;
+$neutral-300: #c7c8cc;
+$neutral-400: #8a8b90;
+$neutral-500: #6b6c70;
+$neutral-600: #57585c;
+$neutral-700: #2a2b2f;
+$neutral-800: #1f2023;
+$neutral-900: #17181b;
+$neutral-950: #0e0f11;
+
+$blue-400: #86a4d9;
+$blue-500: #6688c4;
+$blue-600: #4f6ca0;
+
+$green-500: #3ecf8e;
+$green-600: #2fae76;
+
+$amber-500: #e6b450;
+$amber-600: #cf9a2e;
+
+$red-500: #e5534b;
+$red-600: #cf3d35;

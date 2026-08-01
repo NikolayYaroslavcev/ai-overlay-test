@@ -1,0 +1,43 @@
+// Typographic scale as reusable classes. Built on tokens/scale — components
+// should reach for these before writing one-off font-size/weight/line-height
+// rules in their own <style> blocks.
+//
+// Explicit @use here (not relying on vite's additionalData): that injection
+// only reaches the entry stylesheet vite transforms directly (global.scss),
+// not partials pulled in afterwards via Sass's own @use/@forward resolution.
+@use 'tokens/scale' as *;
+
+.text-heading-lg {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-tight;
+}
+
+.text-heading-md {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-tight;
+}
+
+.text-body {
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-base;
+}
+
+.text-body-sm {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-base;
+}
+
+.text-caption {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-tight;
+  color: var(--color-text-muted);
+}
+
+.text-mono {
+  font-family: $font-family-mono;
+}

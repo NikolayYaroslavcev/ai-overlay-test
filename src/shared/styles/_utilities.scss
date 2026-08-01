@@ -1,0 +1,60 @@
+// Single-purpose utility classes for cases too small to justify a component
+// or a scoped style block. Keep this list short — reach for a shared/ui
+// component instead once a pattern repeats 3+ times.
+//
+// Explicit @use here (not relying on vite's additionalData) — see the note
+// in _typography.scss for why.
+@use 'tokens/scale' as *;
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.no-select {
+  user-select: none;
+}
+
+// Thin, theme-aware scrollbar for scrollable overlay surfaces (chat log,
+// dropdowns) where the OS-default scrollbar looks out of place in a
+// borderless floating window.
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+    border-radius: $radius-sm;
+
+    &:hover {
+      background-color: var(--color-text-muted);
+    }
+  }
+}

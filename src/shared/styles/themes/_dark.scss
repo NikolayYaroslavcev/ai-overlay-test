@@ -1,0 +1,24 @@
+@use '../tokens/palette' as p;
+
+// Default theme. Matches the values the app shipped with before theming
+// existed, so enabling this file is a no-op visually. Applied on `:root` too
+// so dark is the fallback when no `data-theme` attribute is set yet (no FOUC
+// before a future `useTheme` composable runs).
+:root,
+[data-theme='dark'] {
+  --color-bg: #{p.$neutral-950};
+  --color-bg-elevated: #{p.$neutral-900};
+  --color-surface: #{p.$neutral-800};
+  --color-border: #{p.$neutral-700};
+
+  --color-text-primary: #{p.$neutral-50};
+  --color-text-secondary: #{p.$neutral-300};
+  --color-text-muted: #{p.$neutral-500};
+
+  --color-accent: #{p.$blue-500};
+  --color-accent-hover: #{p.$blue-400};
+
+  --color-success: #{p.$green-500};
+  --color-warning: #{p.$amber-500};
+  --color-danger: #{p.$red-500};
+}

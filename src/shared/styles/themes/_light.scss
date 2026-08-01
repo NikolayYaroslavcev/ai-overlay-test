@@ -1,0 +1,22 @@
+@use '../tokens/palette' as p;
+
+// Not wired up to any UI toggle yet — prepared per the architecture audit so
+// adding a theme switcher later is a `useTheme` composable + this file, with
+// no restructuring. See composables/useTheme in README.
+[data-theme='light'] {
+  --color-bg: #{p.$neutral-0};
+  --color-bg-elevated: #{p.$neutral-50};
+  --color-surface: #{p.$neutral-100};
+  --color-border: #{p.$neutral-200};
+
+  --color-text-primary: #{p.$neutral-900};
+  --color-text-secondary: #{p.$neutral-600};
+  --color-text-muted: #{p.$neutral-400};
+
+  --color-accent: #{p.$blue-600};
+  --color-accent-hover: #{p.$blue-500};
+
+  --color-success: #{p.$green-600};
+  --color-warning: #{p.$amber-600};
+  --color-danger: #{p.$red-600};
+}

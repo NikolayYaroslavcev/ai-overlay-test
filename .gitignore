@@ -1,0 +1,22 @@
+# Node
+node_modules
+dist
+dist-ssr
+*.local
+npm-debug.log*
+*.tsbuildinfo
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# OS
+.DS_Store
+
+# Tauri
+src-tauri/target
+src-tauri/gen
+
+# Local tooling (not part of the assignment deliverable)
+graphify-out
