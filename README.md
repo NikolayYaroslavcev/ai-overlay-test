@@ -1,22 +1,21 @@
 # AI Overlay
 
-An always-on-top desktop chat overlay: a small, borderless, glass-panel
-window that streams AI-style responses over a WebSocket. Built as a
-take-home assignment — the "AI" is a mock backend with canned replies, not a
-real model.
+**Русский** · [English](README.en.md)
+
+Десктопный чат-оверлей, который всегда лежит поверх остальных окон: небольшое безрамочное окно со стеклянной панелью, в которое по WebSocket приходят потоковые ответы в стиле ИИ. Сделан как тестовое задание. «ИИ» здесь это мок-бэкенд с заготовленными ответами, а не настоящая модель.
 
 Tauri 2 + Vue 3 + TypeScript + Vite + Pinia + SCSS.
 
-## Tech stack
+## Технологический стек
 
-- **Shell**: Tauri 2 (Rust) — always-on-top, borderless, transparent desktop window
-- **UI**: Vue 3 (`<script setup>`, Composition API) + TypeScript, no component library
-- **State**: Pinia — single `chat` store (connection status, messages, typing, errors)
-- **Styling**: SCSS with CSS custom properties for theming (dark theme wired, light theme prepared)
-- **Realtime**: hand-rolled `WebSocketClient` (reconnect with backoff, app-level heartbeat) talking to a mock Node.js/`ws` server
-- **Tooling**: Vite, ESLint (flat config, layer-boundary enforcement), Prettier, vue-tsc, Knip
+- **Оболочка**: Tauri 2 (Rust), десктопное окно поверх всех окон, без рамки и прозрачное
+- **UI**: Vue 3 (`<script setup>`, Composition API) + TypeScript, без библиотеки компонентов
+- **Состояние**: Pinia, единственное хранилище `chat` (статус соединения, сообщения, набор текста, ошибки)
+- **Стили**: SCSS с CSS custom properties для тем (тёмная тема подключена, светлая подготовлена)
+- **Realtime**: самописный `WebSocketClient` (переподключение с backoff, heartbeat на уровне приложения), работающий с мок-сервером на Node.js/`ws`
+- **Инструменты**: Vite, ESLint (flat config, контроль границ слоёв), Prettier, vue-tsc, Knip
 
-## How to run
+## Как запустить
 
 ```bash
 npm install        # install frontend + mock server dependencies
@@ -26,49 +25,39 @@ npm run dev          # terminal 2 — Vite dev server on http://localhost:1420
 npm run tauri dev    # terminal 2 — requires the Rust toolchain, see below
 ```
 
-The frontend expects the mock server to already be listening — start
-`npm run server` first. `VITE_WS_URL` (see `src/shared/config/websocket.config.ts`)
-overrides the socket URL if the server runs elsewhere; it defaults to
-`ws://localhost:8080`.
+Фронтенд рассчитывает, что мок-сервер уже слушает порт, поэтому сначала запустите `npm run server`. Если сервер работает по другому адресу, URL сокета можно переопределить через `VITE_WS_URL` (см. `src/shared/config/websocket.config.ts`); по умолчанию используется `ws://localhost:8080`.
 
-## Mock WebSocket backend (`server/`)
+## Мок-бэкенд WebSocket (`server/`)
 
-`server/index.js` is a small `ws`-based Node server that stands in for a
-real AI backend. It speaks exactly the wire protocol the client already
-expects (`src/shared/api/types/websocket.ts`) — no AI, no external API calls.
+`server/index.js` это небольшой Node-сервер на `ws`, который заменяет настоящий ИИ-бэкенд. Он говорит ровно на том wire-протоколе, который уже ожидает клиент (`src/shared/api/types/websocket.ts`), без ИИ и без внешних API-вызовов.
 
-For every `{ type: 'chat', id, content, sentAt }` it receives, it:
+На каждое полученное `{ type: 'chat', id, content, sentAt }` он:
 
-1. Immediately sends `{ type: 'typing', isTyping: true }` (acknowledgment).
-2. Waits a random 500–1200ms, to feel like an inference delay.
-3. Picks a random canned reply and streams it back word by word as
-   `{ type: 'chunk', chunk: { messageId, delta, done } }` messages.
-4. Sends `{ type: 'typing', isTyping: false }` once the last chunk goes out.
+1. Сразу отправляет `{ type: 'typing', isTyping: true }` (подтверждение).
+2. Ждёт случайные 500-1200 мс, чтобы это было похоже на задержку инференса.
+3. Выбирает случайный заготовленный ответ и отдаёт его по слову сообщениями `{ type: 'chunk', chunk: { messageId, delta, done } }`.
+4. Отправляет `{ type: 'typing', isTyping: false }`, когда уходит последний чанк.
 
-It also replies to the client's app-level `{ type: 'ping' }` heartbeat with
-`{ type: 'pong' }`, validates every incoming payload structurally (malformed
-messages get a typed `error` response instead of crashing the process), and
-shuts down cleanly on `Ctrl+C`/`SIGTERM` — closing all open sockets before
-exiting so reconnecting clients see a clean close, not a hang.
+Также он отвечает `{ type: 'pong' }` на heartbeat клиента `{ type: 'ping' }` на уровне приложения, структурно проверяет каждую входящую нагрузку (некорректные сообщения получают типизированный ответ `error`, а процесс не падает) и корректно завершается по `Ctrl+C`/`SIGTERM`: перед выходом закрывает все открытые сокеты, чтобы переподключающиеся клиенты видели чистое закрытие, а не зависание.
 
-## Scripts
+## Скрипты
 
-- `npm run dev` — Vite dev server only
-- `npm run server` — mock WebSocket backend (`ws://localhost:8080`)
-- `npm run tauri dev` — full desktop app (requires Rust toolchain, see below)
-- `npm run build` — typecheck + production frontend build
-- `npm run tauri build` — production desktop bundle
-- `npm run typecheck` — `vue-tsc` project check, no emit
-- `npm run lint` / `lint:fix` — ESLint
-- `npm run format` / `format:check` — Prettier
-- `npm run knip` — unused files/exports/dependencies report
+- `npm run dev`: только dev-сервер Vite
+- `npm run server`: мок-бэкенд WebSocket (`ws://localhost:8080`)
+- `npm run tauri dev`: полное десктопное приложение (нужен Rust toolchain, см. ниже)
+- `npm run build`: проверка типов + продакшн-сборка фронтенда
+- `npm run tauri build`: продакшн-сборка десктопного приложения
+- `npm run typecheck`: проверка проекта через `vue-tsc`, без вывода файлов
+- `npm run lint` / `lint:fix`: ESLint
+- `npm run format` / `format:check`: Prettier
+- `npm run knip`: отчёт о неиспользуемых файлах, экспортах и зависимостях
 
-## Prerequisites not yet installed in this environment
+## Предварительные требования, которые пока не установлены в этом окружении
 
-- **Rust toolchain** (`rustc`/`cargo`) is required to run `tauri dev`/`tauri build`. Install via https://rustup.rs, then re-run `npm install` if `@tauri-apps/cli` needs a rebuild.
-- **App icons**: `src-tauri/tauri.conf.json` points at `src-tauri/icons/*`, which doesn't exist yet. Once Rust is installed and you have a source image, run `npm run tauri icon <path-to-1024x1024-png>` to generate the full icon set before bundling.
+- **Rust toolchain** (`rustc`/`cargo`) нужен для запуска `tauri dev`/`tauri build`. Установите его через https://rustup.rs, затем заново выполните `npm install`, если `@tauri-apps/cli` нужно пересобрать.
+- **Иконки приложения**: `src-tauri/tauri.conf.json` указывает на `src-tauri/icons/*`, которых пока нет. Когда Rust будет установлен и появится исходное изображение, выполните `npm run tauri icon <path-to-1024x1024-png>`, чтобы сгенерировать полный набор иконок перед сборкой.
 
-## Project structure
+## Структура проекта
 
 ```
 ai-overlay-test/
@@ -78,58 +67,47 @@ ai-overlay-test/
   public/, index.html  Vite entry
 ```
 
-## Layer conventions (`src/`)
+## Соглашения по слоям (`src/`)
 
-| Layer          | Purpose                                                                                               |
+| Слой           | Назначение                                                                                            |
 | -------------- | ----------------------------------------------------------------------------------------------------- |
-| `app/`         | App bootstrap: root component, provider registration (Pinia, router, i18n…)                           |
-| `shared/`      | Reusable code with **no domain knowledge** — see breakdown below                                      |
-| `entities/`    | Business/domain models and their own state, owned by the domain they model                            |
-| `features/`    | User-facing use cases that act on entities                                                            |
-| `widgets/`     | Composite UI blocks assembled from features/entities (`Overlay`, `Chat`, `Input`, `Status`, `TopBar`) |
-| `services/`    | Integrations with the outside world — one subfolder per integration                                   |
-| `composables/` | Cross-cutting Vue composition functions not tied to one entity/feature                                |
-| `utils/`       | Pure, stateless helper functions — one subfolder per kind                                             |
+| `app/`         | Начальная загрузка приложения: корневой компонент, регистрация провайдеров (Pinia, router, i18n…)     |
+| `shared/`      | Переиспользуемый код **без знаний о предметной области**, разбивка ниже                               |
+| `entities/`    | Бизнес- и доменные модели и их собственное состояние, принадлежащие моделируемому домену              |
+| `features/`    | Пользовательские сценарии, работающие с сущностями                                                    |
+| `widgets/`     | Составные блоки UI, собранные из features/entities (`Overlay`, `Chat`, `Input`, `Status`, `TopBar`)   |
+| `services/`    | Интеграции с внешним миром, по одной подпапке на интеграцию                                           |
+| `composables/` | Сквозные composition-функции Vue, не привязанные к одной сущности или фиче                            |
+| `utils/`       | Чистые вспомогательные функции без состояния, по одной подпапке на вид                                |
 
-No `pages/` layer: this is a single always-on-top overlay window, not a
-routed multi-page app. No `processes/` layer: deprecated in FSD, folded into
-`features/`/`app/` as needed.
+Слоя `pages/` нет: это одно окно оверлея поверх всех окон, а не многостраничное приложение с роутингом. Слоя `processes/` нет: в FSD он объявлен устаревшим и при необходимости растворяется в `features/`/`app/`.
 
-### `shared/` breakdown
+### Разбивка `shared/`
 
-| Folder              | Purpose                                                                                                                                                                                                                         |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `shared/ui/`        | Generic UI primitives. If a third-party component library is used, its components are wrapped/re-exported _only_ here — features/widgets never import the library directly, so swapping it out later touches this folder alone. |
-| `shared/lib/`       | Reusable logic that isn't a pure function: library wrappers/adapters, non-trivial reactive helpers. Distinct from `utils/`, which is pure-function-only.                                                                        |
-| `shared/config/`    | Static app configuration (env parsing, feature flags, constants derived from `import.meta.env`).                                                                                                                                |
-| `shared/constants/` | Plain constant values with no logic.                                                                                                                                                                                            |
-| `shared/api/`       | Low-level, generic client wrappers (e.g. a typed `invoke` wrapper, WS client base). `shared/api/types/` holds DTO / wire-format types for these. Higher-level orchestration built on top belongs in `services/`, not here.      |
-| `shared/types/`     | Generic, framework-agnostic utility types only (`Nullable<T>`, `Maybe<T>`). Domain types live in `entities/<entity>/model`; DTO/API types live in `shared/api/types`. Never mix these three into one file.                      |
-| `shared/assets/`    | Static files (images, fonts, icons).                                                                                                                                                                                            |
-| `shared/styles/`    | Design tokens, themes, reset, typography, utility classes — see below.                                                                                                                                                          |
+| Папка               | Назначение                                                                                                                                                                                                                                                             |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shared/ui/`        | Универсальные примитивы UI. Если используется сторонняя библиотека компонентов, её компоненты оборачиваются и реэкспортируются _только_ здесь. Features и widgets никогда не импортируют библиотеку напрямую, поэтому её замена позже затронет только эту папку.        |
+| `shared/lib/`       | Переиспользуемая логика, не являющаяся чистой функцией: обёртки и адаптеры библиотек, нетривиальные реактивные хелперы. Отличается от `utils/`, где допустимы только чистые функции.                                                                                     |
+| `shared/config/`    | Статическая конфигурация приложения (разбор env, feature flags, константы, выведенные из `import.meta.env`).                                                                                                                                                            |
+| `shared/constants/` | Простые константные значения без логики.                                                                                                                                                                                                                               |
+| `shared/api/`       | Низкоуровневые универсальные обёртки клиентов (например, типизированная обёртка над `invoke`, база WS-клиента). `shared/api/types/` содержит DTO и типы wire-формата для них. Оркестрация более высокого уровня поверх них относится к `services/`, а не сюда.          |
+| `shared/types/`     | Только универсальные, не зависящие от фреймворка служебные типы (`Nullable<T>`, `Maybe<T>`). Доменные типы лежат в `entities/<entity>/model`, DTO и API-типы в `shared/api/types`. Никогда не смешивайте эти три вида в одном файле.                                       |
+| `shared/assets/`    | Статические файлы (изображения, шрифты, иконки).                                                                                                                                                                                                                       |
+| `shared/styles/`    | Дизайн-токены, темы, reset, типографика, утилитарные классы, см. ниже.                                                                                                                                                                                                 |
 
-### `services/` breakdown
+### Разбивка `services/`
 
-One subfolder per integration, each an isolated module with its own public
-API — `websocket/`, `tauri-commands/`, `tauri-events/`, `window/`,
-`clipboard/`, `storage/`, `notifications/`. Services may depend on
-`shared/`, never on `entities/`, `features/`, `widgets/`, or each other's
-internals (compose them from `composables/` or a feature instead of
-importing one service from another).
+Одна подпапка на интеграцию, каждая это изолированный модуль со своим публичным API: `websocket/`, `tauri-commands/`, `tauri-events/`, `window/`, `clipboard/`, `storage/`, `notifications/`. Сервисы могут зависеть от `shared/`, но никогда от `entities/`, `features/`, `widgets/` или внутренностей друг друга (собирайте их вместе через `composables/` или фичу, а не импортируйте один сервис из другого).
 
-### `composables/` breakdown (planned, flat files)
+### Разбивка `composables/` (запланировано, плоские файлы)
 
-`useWindow`, `useHotkeys`, `useAutoScroll`, `useConnection`, `useTheme` — one
-file per composable (`useTheme.ts`), not a folder, unless a composable grows
-colocated tests/types.
+`useWindow`, `useHotkeys`, `useAutoScroll`, `useConnection`, `useTheme`. Один файл на composable (`useTheme.ts`), а не папка, пока у composable не появятся собственные тесты и типы рядом.
 
-### `utils/` breakdown
+### Разбивка `utils/`
 
-`helpers/` (misc pure functions), `guards/` (type guards / runtime checks),
-`formatters/` (data → display string), `validators/` (predicate functions
-over input, e.g. form validation) — keep each function pure and stateless.
+`helpers/` (разные чистые функции), `guards/` (type guards и проверки во время выполнения), `formatters/` (данные → строка для отображения), `validators/` (предикаты над вводом, например валидация форм). Каждая функция должна быть чистой и без состояния.
 
-### `shared/styles/` — tokens and theming
+### `shared/styles/`: токены и темизация
 
 ```
 shared/styles/
@@ -145,34 +123,25 @@ shared/styles/
   global.scss         entry point, imported once in main.ts
 ```
 
-Colors are **CSS custom properties** (`var(--color-text-primary)`), not SCSS
-variables — SCSS variables are compile-time constants and can't respond to a
-runtime theme switch. Everything else (spacing, radii, typography scale,
-z-index) stays a compile-time SCSS variable since it doesn't vary by theme;
-these are in scope in every `.scss` file automatically via the
-`additionalData` `@use` wired in `vite.config.ts`.
+Цвета это **CSS custom properties** (`var(--color-text-primary)`), а не переменные SCSS. Переменные SCSS являются константами времени компиляции и не могут реагировать на смену темы во время выполнения. Всё остальное (отступы, радиусы, типографическая шкала, z-index) остаётся переменными SCSS времени компиляции, так как от темы не зависит; они автоматически доступны в каждом `.scss`-файле через `@use` в `additionalData`, подключённый в `vite.config.ts`.
 
-Switching theme at runtime later is `document.documentElement.dataset.theme
-= 'light' | 'dark'` from a `useTheme` composable — no CSS changes needed.
+Переключение темы во время выполнения позже сводится к `document.documentElement.dataset.theme
+= 'light' | 'dark'` из composable `useTheme`, менять CSS не придётся.
 
-Import everything via the `@` alias (`@/entities/...`), never deep relative
-paths across layers. ESLint enforces the layer-dependency direction (lower
-layers can't import from higher ones) via `no-restricted-imports` overrides
-in `eslint.config.js` — see the `layerBoundaries` block at the bottom of that
-file for the exact rules.
+Импортируйте всё через алиас `@` (`@/entities/...`), а не через глубокие относительные пути между слоями. ESLint следит за направлением зависимостей между слоями (нижние слои не могут импортировать из верхних) через переопределения `no-restricted-imports` в `eslint.config.js`. Точные правила смотрите в блоке `layerBoundaries` в конце этого файла.
 
-## Known limitations
+## Известные ограничения
 
-- **No real AI.** The mock server picks from a fixed list of canned replies — there's no model, no context awareness, no per-conversation memory on the server side.
-- **No persistence.** Conversation history lives only in the Pinia store; refreshing the page or restarting the app clears it.
-- **Light theme is prepared but not wired.** `shared/styles/themes/_light.scss` exists and a `useTheme` composable is planned, but there's no UI toggle yet — the app always renders dark.
-- **Desktop bundling is untested in this environment** — no Rust toolchain or app icons are installed here (see "Prerequisites" above), so only `npm run dev` + `npm run server` were exercised end-to-end, not `tauri build`.
-- **Single WebSocket connection, single conversation.** There's no multi-session/multi-tab handling on the server (each connection is independent and stateless) or conversation switching in the UI.
+- **Нет настоящего ИИ.** Мок-сервер выбирает из фиксированного списка заготовленных ответов. Нет модели, нет учёта контекста, нет памяти по отдельным разговорам на стороне сервера.
+- **Нет сохранения данных.** История разговора живёт только в хранилище Pinia; обновление страницы или перезапуск приложения её очищает.
+- **Светлая тема подготовлена, но не подключена.** Файл `shared/styles/themes/_light.scss` существует, а composable `useTheme` запланирован, но переключателя в UI пока нет, поэтому приложение всегда отображается в тёмной теме.
+- **Десктопная сборка в этом окружении не проверялась.** Здесь не установлены ни Rust toolchain, ни иконки приложения (см. «Предварительные требования» выше), поэтому сквозная проверка проводилась только для `npm run dev` + `npm run server`, но не для `tauri build`.
+- **Одно WebSocket-соединение, один разговор.** На сервере нет обработки нескольких сессий и вкладок (каждое соединение независимо и не хранит состояния), а в UI нет переключения между разговорами.
 
-## Future improvements
+## Планы по улучшению
 
-- Wire the light/dark theme toggle through `useTheme` (the CSS custom property plumbing already supports it).
-- Persist conversation history (e.g. `services/storage`, already scaffolded) so the overlay survives a restart.
-- Add global hotkeys / window show-hide via `useHotkeys` + `services/window` (folders scaffolded, not implemented).
-- Swap the mock server for a real model behind the same `ServerMessage`/`ClientMessage` contract — the frontend wouldn't need to change.
-- Add component/unit tests (none exist yet) around `WebSocketClient`'s reconnect/backoff logic and the chat store's message-merging behavior, since those are the parts most likely to regress silently.
+- Подключить переключатель светлой и тёмной темы через `useTheme` (механизм CSS custom properties это уже поддерживает).
+- Сохранять историю разговора (например, через `services/storage`, уже заготовленный), чтобы оверлей переживал перезапуск.
+- Добавить глобальные горячие клавиши и показ/скрытие окна через `useHotkeys` + `services/window` (папки созданы, реализации нет).
+- Заменить мок-сервер настоящей моделью за тем же контрактом `ServerMessage`/`ClientMessage`. Фронтенд при этом менять не придётся.
+- Добавить компонентные и юнит-тесты (их пока нет) для логики переподключения и backoff в `WebSocketClient` и для слияния сообщений в хранилище чата, поскольку именно эти части скорее всего незаметно сломаются.
