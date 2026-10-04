@@ -65,10 +65,10 @@ exiting so reconnecting clients see a clean close, not a hang.
 - `npm run format` / `format:check`: Prettier
 - `npm run knip`: unused files/exports/dependencies report
 
-## Prerequisites not yet installed in this environment
+## Build prerequisites
 
-- **Rust toolchain** (`rustc`/`cargo`) is required to run `tauri dev`/`tauri build`. Install via https://rustup.rs, then re-run `npm install` if `@tauri-apps/cli` needs a rebuild.
-- **App icons**: `src-tauri/tauri.conf.json` points at `src-tauri/icons/*`, which doesn't exist yet. Once Rust is installed and you have a source image, run `npm run tauri icon <path-to-1024x1024-png>` to generate the full icon set before bundling.
+- **Rust toolchain** (`rustc`/`cargo`) is required for `tauri dev`/`tauri build`. Install it from https://rustup.rs.
+- **App icons**: before bundling, generate the icon set in `src-tauri/icons/` with `npm run tauri icon <path-to-1024x1024-png>`.
 
 ## Project structure
 
@@ -119,7 +119,7 @@ API: `websocket/`, `tauri-commands/`, `tauri-events/`, `window/`,
 internals (compose them from `composables/` or a feature instead of
 importing one service from another).
 
-### `composables/` breakdown (planned, flat files)
+### `composables/` breakdown (flat files)
 
 `useWindow`, `useHotkeys`, `useAutoScroll`, `useConnection`, `useTheme`. One
 file per composable (`useTheme.ts`), not a folder, unless a composable grows
@@ -162,19 +162,3 @@ paths across layers. ESLint enforces the layer-dependency direction (lower
 layers can't import from higher ones) via `no-restricted-imports` overrides
 in `eslint.config.js`. See the `layerBoundaries` block at the bottom of that
 file for the exact rules.
-
-## Known limitations
-
-- **No real AI.** The mock server picks from a fixed list of canned replies. There's no model, no context awareness, no per-conversation memory on the server side.
-- **No persistence.** Conversation history lives only in the Pinia store; refreshing the page or restarting the app clears it.
-- **Light theme is prepared but not wired.** `shared/styles/themes/_light.scss` exists and a `useTheme` composable is planned, but there's no UI toggle yet, so the app always renders dark.
-- **Desktop bundling is untested in this environment.** No Rust toolchain or app icons are installed here (see "Prerequisites" above), so only `npm run dev` + `npm run server` were exercised end-to-end, not `tauri build`.
-- **Single WebSocket connection, single conversation.** There's no multi-session/multi-tab handling on the server (each connection is independent and stateless) or conversation switching in the UI.
-
-## Future improvements
-
-- Wire the light/dark theme toggle through `useTheme` (the CSS custom property plumbing already supports it).
-- Persist conversation history (e.g. `services/storage`, already scaffolded) so the overlay survives a restart.
-- Add global hotkeys / window show-hide via `useHotkeys` + `services/window` (folders scaffolded, not implemented).
-- Swap the mock server for a real model behind the same `ServerMessage`/`ClientMessage` contract. The frontend wouldn't need to change.
-- Add component/unit tests (none exist yet) around `WebSocketClient`'s reconnect/backoff logic and the chat store's message-merging behavior, since those are the parts most likely to regress silently.
